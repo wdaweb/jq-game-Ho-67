@@ -1,0 +1,445 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>辦公室摸魚</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Kaisei+Tokumin&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      *,
+      *::after,
+      *::before {
+        margin: 0;
+        padding: 0;
+        font-family: "Kaisei Tokumin", serif;
+      }
+
+      .title {
+        text-align: center;
+        background: #c6b475;
+        display: block;
+        padding: 0.8rem;
+        line-height: 1.5;
+      }
+
+      .title h1 {
+        font-size: 40px;
+      }
+
+      .title p {
+        font-size: 18px;
+      }
+
+      .container {
+        position: relative;
+        width: 100%;
+        aspect-ratio: 3840 / 2160;
+        background: url("./images/office-01.png") no-repeat center center;
+        background-size: contain;
+      }
+
+      .screen {
+        position: absolute;
+        left: 12.865%;
+        top: 25%;
+        width: 39.3%;
+        height: 40%;
+      }
+
+      .clock {
+        position: absolute;
+        left: 27.9%;
+        top: 3.15%;
+        width: 9%;
+        height: 15.9%;
+      }
+
+      .screen iframe,
+      .clock iframe {
+        width: 100%;
+        height: 100%;
+        border: none;
+        /* background: red; */
+        /* opacity: 0.3; */
+      }
+
+      .text {
+        position: absolute;
+        left: 59%;
+        top: 10%;
+        width: 16%;
+        height: 29%;
+      }
+
+      .speech-bubble {
+        position: relative;
+        width: 95%;
+        height: 75%;
+        border: 4px solid #580b0b;
+        border-radius: 1rem;
+        color: #090f2b;
+        background: #9fb4c6;
+        font-size: 20px;
+        font-weight: bold;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        box-sizing: border-box;
+      }
+
+      /* 尾巴（小三角形） */
+      .speech-bubble::after {
+        content: "";
+        position: absolute;
+        /* 往下突出 */
+        bottom: -10px;
+        /* 往右邊貼近 */
+        right: -15px;
+        transform: rotate(315deg);
+        width: 0;
+        height: 0;
+        border-width: 10px 10px 0 10px;
+        border-style: solid;
+        border-color: #333 transparent transparent transparent;
+      }
+
+      /* 計時文字閃爍動畫 */
+      @keyframes blink {
+        0% {
+          opacity: 1;
+        }
+
+        50% {
+          opacity: 0.5;
+        }
+
+        100% {
+          opacity: 1;
+        }
+      }
+
+      /* 遊戲進行中時套用閃爍動畫 */
+      .blinking {
+        animation: blink 1s linear infinite;
+      }
+
+      .boss-face {
+        position: absolute;
+        left: 76.5%;
+        top: 7%;
+        width: 17.5%;
+        height: 46%;
+        clip-path: polygon(
+          0% 100%,
+          0% 79%,
+          12% 76%,
+          16% 65%,
+          17% 60%,
+          14% 50%,
+          13% 30%,
+          16% 16%,
+          20% 9%,
+          36% 0%,
+          100% 0%,
+          100% 100%
+        );
+        /* background: #00000080; */
+        cursor: default;
+      }
+
+      #boss-face {
+        position: relative;
+        /* 為了讓血跡 div 絕對定位在內部 */
+        overflow: hidden;
+      }
+
+      .blood {
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        pointer-events: none;
+        /* 不擋住滑鼠事件 */
+      }
+
+      #game2 {
+        position: relative;
+        width: 100%;
+        aspect-ratio: 3840 / 2160;
+        background: url("./images/mixkit-person-overwhelmed-by-a-mountain-of-paperwork-70-desktop-wallpaper.png")
+          no-repeat center center;
+        background-size: contain;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .weapon {
+        position: absolute;
+        top: 10%;
+        left: 55%;
+        transform: translate(-50%, -50%);
+        transform: scale(0.8);
+        text-align: center;
+        background: #00000020;
+        transition: background 0.3s;
+        border-radius: 50%;
+      }
+
+      .weapon:hover {
+        background: #ffffff20;
+        cursor: pointer;
+      }
+
+      .weapon.active {
+        background: #ffffff30;
+      }
+
+      .weapon img {
+        display: block;
+        filter: brightness(0) saturate(100%) invert(40%) sepia(90%)
+          saturate(200%) hue-rotate(310deg);
+      }
+
+      .score {
+        position: relative;
+        top: 100px;
+        width: 45%;
+        height: 45%;
+        background: #ffffff50;
+        backdrop-filter: blur(3px);
+        border-radius: 30px;
+        text-align: center;
+        line-height: 2rem;
+        padding: 1rem;
+      }
+
+      .boss {
+        position: absolute;
+        top: 90%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+      }
+
+      .boss a {
+        display: block;
+        background: #090f2b;
+        border-radius: 10px;
+        text-decoration: none;
+        color: #fff;
+        width: 80px;
+        padding: 0.5rem;
+        text-align: center;
+      }
+
+      #btn-start {
+        background: gray;
+        cursor: not-allowed;
+        transition: background 0.3s;
+      }
+
+      #btn-start.enabled {
+        background: crimson;
+        cursor: pointer;
+      }
+
+      #footer {
+        text-align: center;
+        height: 40px;
+        background: #080b17;
+        color: #fff;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="title">
+      <h1>摸魚不是錯！是倖存的方式</h1>
+      <p>再努力也是別人的 KRA　在慣老闆的注視下盡情摸魚吧</p>
+    </div>
+    <div class="container">
+      <div class="screen">
+        <iframe src="./game1.html" frameborder="0"></iframe>
+      </div>
+      <div class="clock">
+        <iframe src="./clock.html" frameborder="0"></iframe>
+      </div>
+      <div class="text">
+        <div class="speech-bubble">
+          工作是修行， <br />
+          不要太計較回報。 <br />
+          <br />
+          只要你願意，<br />
+          凌晨三點也能開會。
+        </div>
+      </div>
+      <div id="boss-face" class="boss-face"></div>
+    </div>
+    <div id="game2">
+      <div class="weapon">
+        <img src="./images/speech_17.png" alt="對話框" />
+      </div>
+      <div class="score">
+        遊戲說明: <br />
+        拿上反PUA武器後再按下面的打BOSS，期間內點擊老闆計分<br />
+        遊戲期間內老闆的話框會閃爍，當話框停止閃爍即遊戲停止<br />
+        <br />
+        發洩時間：<span id="text-time">10</span>秒 <br />
+        本次怨氣指數：<span id="text-score">0</span> <br />
+        社畜排行第一：<span id="text-highscore-name">none</span> <br />
+        最高怨氣指數：<span id="text-highscore-score">0</span> <br />
+      </div>
+      <div class="boss">
+        <a href="#boss-face" id="btn-start">打BOSS</a>
+      </div>
+    </div>
+    <div id="footer">&copy;2025泰山前端班作業</div>
+
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"
+      integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g=="
+      crossorigin="anonymous"
+    ></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+      let canHitBoss = false; // 是否啟用打Boss模式
+      let gameStarted = false;
+      const GAME_TIME = 10;
+      let score = 0;
+      let timeLeft = 0;
+      let timer = 0;
+
+      const highscore = {
+        name: "none",
+        score: 0,
+      };
+
+      // 讀取本地最高分
+      if (localStorage.apple) {
+        const data = JSON.parse(localStorage.apple);
+        highscore.name = data.name;
+        highscore.score = data.score;
+        $("#text-highscore-name").text(highscore.name);
+        $("#text-highscore-score").text(highscore.score);
+      }
+
+      // 點擊 .weapon 開關（只能在未遊戲中切換）
+      $(".weapon").on("click", function () {
+        if (gameStarted === true) return; // 倒數中禁止切換
+
+        canHitBoss = !canHitBoss;
+
+        if (canHitBoss) {
+          $(this).addClass("active").css("cursor", "pointer");
+          $("#btn-start").addClass("enabled");
+          $("#boss-face").css(
+            "cursor",
+            "url(./images/cursor_black.png) 50 50, auto"
+          );
+        } else {
+          $(this).removeClass("active").css("cursor", "default");
+          $("#btn-start").removeClass("enabled");
+          $("#boss-face").css("cursor", "default");
+          $("#text-time").text("10");
+        }
+      });
+
+      // 點擊開始遊戲（僅在開啟打Boss模式下能點）
+      $("#btn-start").on("click", function () {
+        if (canHitBoss === false || gameStarted === true) return;
+
+        $(this).attr("disabled", true); // 停用按鈕
+        score = 0;
+        timeLeft = GAME_TIME;
+        gameStarted = true;
+
+        $("#text-score").text(score);
+        $(".text").addClass("blinking");
+
+        const _this = this;
+
+        timer = setInterval(() => {
+          timeLeft--;
+          $("#text-time").text(timeLeft);
+
+          // 時間到
+          if (timeLeft === 0) {
+            clearInterval(timer);
+            gameStarted = false;
+            $(".text").removeClass("blinking");
+            $(_this).attr("disabled", false); // 啟用按鈕
+
+            // 如果破紀錄
+            if (score > highscore.score) {
+              Swal.fire({
+                title: "最高分",
+                text: "請輸入名字",
+                input: "text",
+                confirmButtonText: "儲存",
+                inputPlaceholder: "你的暱稱",
+              }).then((result) => {
+                const name = result.value || "本來上班就煩";
+                highscore.name = name;
+                highscore.score = score;
+                $("#text-highscore-name").text(name);
+                $("#text-highscore-score").text(score);
+                localStorage.apple = JSON.stringify(highscore);
+              });
+            }
+          }
+        }, 1000);
+      });
+
+      $("#boss-face").on("click", function (el) {
+        if (canHitBoss === false || gameStarted === false) return;
+
+        const boss = $(this);
+        // .offset() 返回的座標都是元素在整個頁面中的固定位置，滾動頁面時返回值會改變
+        // 獲取或設定元素相對於 整個文檔（document） 左上角的絕對位置，返回或接受的值是像素單位的 top 和 left
+        const offset = boss.offset();
+        // 順序一定是「滑鼠位置 - 元素位置」
+        // 點擊時滑鼠在整個頁面上的 X 座標 - 點擊的位置在 Boss 元素內部的水平位置
+        const clickX = el.pageX - offset.left;
+        // 點擊時滑鼠在整個頁面上的 Y 座標 - 點擊的位置在 Boss 元素內部的垂直位置
+        const clickY = el.pageY - offset.top;
+
+        // 建立血跡 div
+        const blood = $('<div class="blood"></div>').css({
+          position: "absolute",
+          top: clickY - 30 + "px", // 偏移中心（血圖大小 60px）
+          left: clickX - 30 + "px",
+          width: "60px",
+          height: "60px",
+          backgroundImage: "url('./images/blood.png')",
+          backgroundSize: "cover",
+          backgroundRepeat: "no-repeat",
+          opacity: 0, // 起始透明
+          pointerEvents: "none", // 不影響點擊
+        });
+
+        // 插入到 boss-face 裡
+        boss.append(blood);
+
+        // 加上漸變 class
+        setTimeout(() => {
+          blood.css("opacity", 1); // 淡入
+          setTimeout(() => {
+            blood.css("opacity", 0); // 淡出
+          }, 600); // 中間停留時間
+        }, 30);
+
+        // 0.7秒後移除
+        setTimeout(() => {
+          blood.remove();
+        }, 700);
+
+        // 加分
+        score++;
+        $("#text-score").text(score);
+      });
+    </script>
+  </body>
+</html>
